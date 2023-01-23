@@ -3,11 +3,64 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ViewThatFits(in: .vertical) {
+        ScrollingViewThatFits {
             LongContent()
-            ScrollView {
-                LongContent()
+        } header: {
+            Color.purple
+                .frame(height: 50)
+                .frame(maxWidth: .infinity)
+        } footer: {
+            Color.yellow
+                .frame(height: 100)
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+struct ScrollingViewThatFits<Content: View, Header: View, Footer: View>: View {
+    let content: Content
+    let header: Header
+    let footer: Footer
+
+    init(
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder header: () -> Header,
+        @ViewBuilder footer: () -> Footer
+    ) {
+        self.content = content()
+        self.header = header()
+        self.footer = footer()
+    }
+
+    var notScrolling: some View {
+        VStack {
+            header
+            Spacer(minLength: 0)
+            content
+            Spacer(minLength: 0)
+            footer
+        }
+    }
+
+    var scrolling: some View {
+        ScrollView {
+            header.hidden()
+            content
+            footer.hidden()
+        }
+        .overlay {
+            VStack {
+                header
+                Spacer(minLength: 0)
+                footer
             }
+        }
+    }
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            notScrolling
+            scrolling
         }
     }
 }
